@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TurdTracker Pro 💩</title>
+  <meta name="description" content="The most serious shit-tracking app on the planet." />
+  <meta name="theme-color" content="#1a1208" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TurdTracker" />
+
+  <!-- PWA Manifest inline via data URI -->
+  <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22TurdTracker%20Pro%22%2C%22short_name%22%3A%22TurdTracker%22%2C%22description%22%3A%22The%20most%20serious%20shit-tracking%20app%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1208%22%2C%22theme_color%22%3A%22%231a1208%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Butf8%2C%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Ctext%20y%3D'.9em'%20font-size%3D'460'%3E%F0%9F%92%A9%3C%2Ftext%3E%3C%2Fsvg%3E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast, serverTimestamp, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+    const firebaseConfig = {
+      projectId: "turdtracker-76650",
+      databaseURL: "https://turdtracker-76650-default-rtdb.europe-west1.firebasedatabase.app",
+      apiKey: "AIzaSyPlaceholderKeyReplaceMe",
+    };
+
+    // =====================================================
+    // ⚠️  FIREBASE API KEY HIER EINTRAGEN ⚠️
+    // Ersetze "AIzaSyPlaceholderKeyReplaceMe" oben mit
+    // deinem echten Firebase API Key aus der Firebase
+    // Console (Projekteinstellungen → Allgemein → Web-App)
+    // =====================================================
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window._db = db;
+    window._ref = ref;
+    window._push = push;
+    window._onValue = onValue;
+    window._query = query;
+    window._orderByChild = orderByChild;
+    window._limitToLast = limitToLast;
+    window._serverTimestamp = serverTimestamp;
+    window._get = get;
+
+    document.dispatchEvent(new Event('firebase-ready'));
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap');
+
+    :root {
+      --bg: #0f0a04;
+      --bg2: #1a1208;
+      --bg3: #251b0c;
+      --bg4: #312412;
+      --surface: #1e1508;
+      --surface2: #2a1e0f;
+      --border: rgba(255, 180, 40, 0.12);
+      --border2: rgba(255, 180, 40, 0.25);
+      --gold: #f5a623;
+      --gold2: #ffd166;
+      --gold3: #c47d0a;
+      --brown: #8b4513;
+      --poop: #6b3a10;
+      --text: #f0e6cc;
+      --text2: #a8926e;
+      --text3: #6b5a3a;
+      --danger: #e85d3a;
+      --success: #4caf6a;
+      --accent: #d4782a;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE TEXTURE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #1a1208 0%, transparent 100%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo {
+      font-size: 2.8rem;
+      line-height: 1;
+      filter: drop-shadow(0 0 20px rgba(213, 120, 42, 0.4));
+      animation: wobble 4s ease-in-out infinite;
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+
+    .header-text h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      color: var(--gold2);
+      line-height: 1;
+    }
+
+    .header-text p {
+      font-size: 0.7rem;
+      color: var(--text3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      margin-top: 2px;
+    }
+
+    /* ─── NAV TABS ─── */
+    .tabs {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.85rem 0.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab .tab-icon { font-size: 1.2rem; }
+    .tab.active { color: var(--gold); background: var(--surface); }
+    .tab.active .tab-icon { filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6)); }
+
+    /* ─── PAGES ─── */
+    .page { display: none; position: relative; z-index: 1; }
+    .page.active { display: block; }
+
+    /* ─── LOG PAGE ─── */
+    .log-page { padding: 1.5rem; }
+
+    .user-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .user-section label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    .user-input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    input[type="text"], select, textarea {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      padding: 0.65rem 0.85rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: var(--gold3);
+    }
+
+    input[type="text"]::placeholder { color: var(--text3); }
+
+    .btn {
+      padding: 0.65rem 1.2rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { background: var(--bg4); color: var(--text); border-color: var(--gold3); }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--gold);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .btn-primary:hover { background: var(--gold); color: var(--bg); }
+
+    .btn-poop {
+      font-size: 1.5rem;
+      padding: 1rem;
+      background: var(--poop);
+      border-color: var(--brown);
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-poop:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(107, 58, 16, 0.6);
+    }
+
+    .btn-poop:active { transform: scale(0.95); }
+
+    /* ─── METRICS ─── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .metric-card .metric-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 4px;
+    }
+
+    .metric-card .metric-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: var(--gold2);
+      line-height: 1;
+    }
+
+    .metric-card .metric-sub {
+      font-size: 0.7rem;
+      color: var(--text3);
+      margin-top: 2px;
+    }
+
+    /* ─── LOG FORM ─── */
+    .log-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-row {
+      margin-bottom: 1rem;
+    }
+
+    .form-row label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 0.4rem;
+    }
+
+    /* ─── STAR RATING ─── */
+    .star-rating {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .star {
+      font-size: 1.5rem;
+      cursor: pointer;
+      opacity: 0.3;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .star.active { opacity: 1; }
+    .star:hover { transform: scale(1.2); }
+
+    /* ─── TYPE GRID ─── */
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .type-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 0.5rem 0.25rem;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .type-btn .type-emoji { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+    .type-btn.selected { background: var(--poop); border-color: var(--brown); color: var(--text); }
+
+    /* ─── LOG BUTTON ROW ─── */
+    .log-btn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .log-btn-info {
+      font-size: 0.75rem;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed;
+      bottom: 6rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--success);
+      color: #fff;
+      padding: 0.65rem 1.5rem;
+      border-radius: 2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      z-index: 999;
+      opacity: 0;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── SCOREBOARD ─── */
+    .scoreboard-page { padding: 1.5rem; }
+
+    .scoreboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .scoreboard-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      color: var(--gold2);
+      letter-spacing: 0.05em;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--success);
+      letter-spacing: 0.08em;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* ─── PODIUM ─── */
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      height: 160px;
+    }
+
+    .podium-slot {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      max-width: 110px;
+    }
+
+    .podium-avatar {
+      font-size: 1.5rem;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .podium-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text2);
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .podium-score {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      color: var(--gold2);
+    }
+
+    .podium-block {
+      width: 100%;
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .podium-slot:nth-child(1) .podium-block {
+      height: 80px;
+      background: linear-gradient(180deg, #a0844a 0%, #7a6235 100%);
+    }
+
+    .podium-slot:nth-child(2) .podium-block {
+      height: 110px;
+      background: linear-gradient(180deg, #d4a843 0%, #b8892a 100%);
+    }
+
+    .podium-slot:nth-child(3) .podium-block {
+      height: 60px;
+      background: linear-gradient(180deg, #7a5a38 0%, #5c4228 100%);
+    }
+
+    /* ─── LEADERBOARD LIST ─── */
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lb-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      animation: slideIn 0.3s ease both;
+    }
+
+    .lb-row.is-me { border-color: var(--gold3); background: var(--surface2); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .lb-rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem;
+      color: var(--text3);
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    .lb-rank.top1 { color: #ffd700; }
+    .lb-rank.top2 { color: #c0c0c0; }
+    .lb-rank.top3 { color: #cd7f32; }
+
+    .lb-name {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lb-you-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      background: var(--gold3);
+      color: var(--bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.06em;
+    }
+
+    .lb-score {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      color: var(--gold2);
+    }
+
+    .lb-poop { font-size: 1rem; color: var(--text3); margin-left: auto; }
+
+    /* ─── HISTORY PAGE ─── */
+    .history-page { padding: 1.5rem; }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      animation: slideIn 0.3s ease both;
+    }
+
+    .history-emoji { font-size: 1.5rem; flex-shrink: 0; }
+
+    .history-info { flex: 1; }
+
+    .history-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .history-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text3);
+      margin-top: 3px;
+      letter-spacing: 0.04em;
+    }
+
+    .history-stars { color: var(--gold); font-size: 0.8rem; }
+
+    /* ─── STATS PAGE ─── */
+    .stats-page { padding: 1.5rem; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .streak-card {
+      background: var(--surface);
+      border: 1px solid var(--gold3);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+      grid-column: 1 / -1;
+    }
+
+    .streak-emoji { font-size: 2.5rem; }
+
+    .streak-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+      color: var(--gold2);
+      line-height: 1;
+    }
+
+    .streak-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+    }
+
+    .empty-state .empty-emoji {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    /* ─── LOADING ─── */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 0.75rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ─── FIREBASE KEY WARNING ─── */
+    .api-key-warning {
+      background: rgba(232, 93, 58, 0.1);
+      border: 1px solid rgba(232, 93, 58, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--danger);
+      letter-spacing: 0.03em;
+      line-height: 1.5;
+    }
+
+    /* ─── BOTTOM SAFE AREA ─── */
+    .bottom-spacer { height: 2rem; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (min-width: 600px) {
+      .log-page, .scoreboard-page, .history-page, .stats-page {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">💩</div>
+  <div class="header-text">
+    <h1>TurdTracker Pro</h1>
+    <p>Cross-Platform · Firebase Realtime</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" onclick="switchTab('log')" id="tab-log">
+    <span class="tab-icon">📝</span>
+    <span>Log</span>
+  </button>
+  <button class="tab" onclick="switchTab('scoreboard')" id="tab-scoreboard">
+    <span class="tab-icon">🏆</span>
+    <span>Board</span>
+  </button>
+  <button class="tab" onclick="switchTab('history')" id="tab-history">
+    <span class="tab-icon">📜</span>
+    <span>History</span>
+  </button>
+  <button class="tab" onclick="switchTab('stats')" id="tab-stats">
+    <span class="tab-icon">📊</span>
+    <span>Stats</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- LOG PAGE                                            -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page active" id="page-log">
+  <div class="log-page">
+
+    <div id="key-warning" class="api-key-warning" style="display:none">
+      ⚠️ Firebase API Key fehlt! Öffne index.html und ersetze <code>AIzaSyPlaceholderKeyReplaceMe</code> mit deinem echten Key aus der Firebase Console.
+    </div>
+
+    <div class="user-section">
+      <label>Dein Name / Username</label>
+      <div class="user-input-row">
+        <input type="text" id="username" placeholder="z.B. TurboTurd42" maxlength="20" />
+        <button class="btn" onclick="saveUsername()">Save</button>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Heute</div>
+        <div class="metric-value" id="metric-today">0</div>
+        <div class="metric-sub">logs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Gesamt</div>
+        <div class="metric-value" id="metric-total">0</div>
+        <div class="metric-sub">alle zeiten</div>
+      </div>
+    </div>
+
+    <div class="log-form">
+      <div class="form-row">
+        <label>Qualität (1–5 Stars)</label>
+        <div class="star-rating" id="star-rating">
+          <span class="star" data-val="1" onclick="setRating(1)">💩</span>
+          <span class="star" data-val="2" onclick="setRating(2)">💩</span>
+          <span class="star" data-val="3" onclick="setRating(3)">💩</span>
+          <span class="star" data-val="4" onclick="setRating(4)">💩</span>
+          <span class="star" data-val="5" onclick="setRating(5)">💩</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Typ</label>
+        <div class="type-grid" id="type-grid">
+          <button class="type-btn selected" data-type="normal" onclick="setType('normal')">
+            <span class="type-emoji">💩</span>Normal
+          </button>
+          <button class="type-btn" data-type="liquid" onclick="setType('liquid')">
+            <span class="type-emoji">💧</span>Liquid
+          </button>
+          <button class="type-btn" data-type="solid" onclick="setType('solid')">
+            <span class="type-emoji">🪨</span>Solid
+          </button>
+          <button class="type-btn" data-type="ghost" onclick="setType('ghost')">
+            <span class="type-emoji">👻</span>Ghost
+          </button>
+          <button class="type-btn" data-type="superpoop" onclick="setType('superpoop')">
+            <span class="type-emoji">💥</span>Super
+          </button>
+          <button class="type-btn" data-type="emergency" onclick="setType('emergency')">
+            <span class="type-emoji">🚨</span>Emergency
+          </button>
+          <button class="type-btn" data-type="art" onclick="setType('art')">
+            <span class="type-emoji">🎨</span>Art
+          </button>
+          <button class="type-btn" data-type="zen" onclick="setType('zen')">
+            <span class="type-emoji">🧘</span>Zen
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Notiz (optional)</label>
+        <textarea id="note" rows="2" placeholder="Was war besonders daran?" style="resize:none"></textarea>
+      </div>
+
+      <div class="log-btn-row">
+        <div class="log-btn-info" id="log-btn-info">Bereit zum Loggen</div>
+        <button class="btn btn-poop" onclick="logEntry()" title="Log it!">💩</button>
+      </div>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- SCOREBOARD PAGE                                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-scoreboard">
+  <div class="scoreboard-page">
+
+    <div class="scoreboard-header">
+      <div class="scoreboard-title">🏆 Global Scoreboard</div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE
+      </div>
+    </div>
+
+    <div class="podium" id="podium">
+      <div class="loading"><div class="spinner"></div><br>Loading...</div>
+    </div>
+
+    <div class="leaderboard-list" id="leaderboard-list">
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- HISTORY PAGE                                        -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-history">
+  <div class="history-page">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+      <div class="scoreboard-title" style="font-size:1.4rem;">📜 Meine History</div>
+      <div id="history-username-tag" style="font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--text3);"></div>
+    </div>
+
+    <div class="history-list" id="history-list">
+      <div class="loading"><div class="spinner"></div><br>Loading...</div>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- STATS PAGE                                          -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="page" id="page-stats">
+  <div class="stats-page">
+
+    <div class="scoreboard-title" style="font-size:1.4rem; margin-bottom:1.25rem;">📊 Meine Stats</div>
+
+    <div class="streak-card">
+      <div class="streak-emoji">🔥</div>
+      <div class="streak-number" id="stat-streak">0</div>
+      <div class="streak-label">Day Streak</div>
+    </div>
+
+    <div class="stats-grid" style="margin-top:0.75rem;">
+      <div class="metric-card">
+        <div class="metric-label">Gesamt</div>
+        <div class="metric-value" id="stat-total">0</div>
+        <div class="metric-sub">logs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Heute</div>
+        <div class="metric-value" id="stat-today">0</div>
+        <div class="metric-sub">logs</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ø Qualität</div>
+        <div class="metric-value" id="stat-avg">–</div>
+        <div class="metric-sub">💩 rating</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Lieblings-Typ</div>
+        <div class="metric-value" id="stat-fav" style="font-size:1.5rem;">–</div>
+        <div class="metric-sub">häufigster</div>
+      </div>
+    </div>
+
+    <!-- Weekly Chart -->
+    <div class="metric-card" style="margin-top:0.75rem; grid-column:1/-1;">
+      <div class="metric-label" style="margin-bottom:0.75rem;">Diese Woche</div>
+      <div id="week-chart" style="display:flex; align-items:flex-end; gap:6px; height:80px; padding:0 4px;">
+      </div>
+      <div id="week-labels" style="display:flex; justify-content:space-around; margin-top:6px;">
+      </div>
+    </div>
+
+    <div class="bottom-spacer"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TurdTracker Pro – PWA Logic                                 ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+let currentRating = 3;
+let currentType = 'normal';
+let username = localStorage.getItem('tt_username') || '';
+let myEntries = [];
+let allScores = {};
+let firebaseReady = false;
+
+const TYPE_EMOJIS = {
+  normal: '💩', liquid: '💧', solid: '🪨', ghost: '👻',
+  superpoop: '💥', emergency: '🚨', art: '🎨', zen: '🧘'
+};
+
+// ──────────────────────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────────────────────
+document.addEventListener('firebase-ready', () => {
+  firebaseReady = true;
+  checkApiKey();
+  if (username) {
+    document.getElementById('username').value = username;
+  }
+  setRating(3);
+  initRealtime();
+});
+
+function checkApiKey() {
+  // Check if placeholder key is still in use
+  // We can't easily detect this from JS, so we show warning on Firebase error
+}
+
+// ──────────────────────────────────────────────────────────────
+// FIREBASE REALTIME SUBSCRIPTIONS
+// ──────────────────────────────────────────────────────────────
+function initRealtime() {
+  const db = window._db;
+  const ref = window._ref;
+  const onValue = window._onValue;
+  const query = window._query;
+  const orderByChild = window._orderByChild;
+
+  // Subscribe to all entries for scoreboard
+  const allRef = ref(db, 'entries');
+  onValue(allRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    processAllEntries(data);
+  }, (error) => {
+    console.error('Firebase error:', error);
+    document.getElementById('key-warning').style.display = 'block';
+  });
+}
+
+function processAllEntries(data) {
+  // Build score map: username -> count
+  const scores = {};
+  const entries = [];
+
+  Object.values(data).forEach(entry => {
+    if (!entry.username) return;
+    scores[entry.username] = (scores[entry.username] || 0) + 1;
+    entries.push(entry);
+  });
+
+  allScores = scores;
+
+  // My entries (by username)
+  if (username) {
+    myEntries = entries
+      .filter(e => e.username === username)
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  }
+
+  updateUI(entries);
+}
+
+// ──────────────────────────────────────────────────────────────
+// UI UPDATES
+// ──────────────────────────────────────────────────────────────
+function updateUI(allEntries) {
+  updateMetrics(allEntries);
+  renderScoreboard();
+  renderHistory();
+  renderStats(allEntries);
+}
+
+function updateMetrics(allEntries) {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const todayCount = myEntries.filter(e => e.timestamp > todayStart.getTime()).length;
+  const totalCount = myEntries.length;
+
+  document.getElementById('metric-today').textContent = todayCount;
+  document.getElementById('metric-total').textContent = totalCount;
+}
+
+function renderScoreboard() {
+  const sorted = Object.entries(allScores)
+    .sort((a, b) => b[1] - a[1]);
+
+  // Podium (top 3)
+  const podiumEl = document.getElementById('podium');
+  const podiumOrder = [sorted[1], sorted[0], sorted[2]]; // 2nd, 1st, 3rd
+  const medals = ['🥈', '🥇', '🥉'];
+
+  if (sorted.length === 0) {
+    podiumEl.innerHTML = '<div class="empty-state"><span class="empty-emoji">🏜️</span>Noch keine Einträge</div>';
+    document.getElementById('leaderboard-list').innerHTML = '';
+    return;
+  }
+
+  podiumEl.innerHTML = podiumOrder.map((entry, i) => {
+    if (!entry) return '<div class="podium-slot"></div>';
+    return `
+      <div class="podium-slot">
+        <div class="podium-avatar">${medals[i]}</div>
+        <div class="podium-name">${escHtml(entry[0])}</div>
+        <div class="podium-score">${entry[1]}</div>
+        <div class="podium-block">${medals[i]}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Full list (top 20)
+  const listEl = document.getElementById('leaderboard-list');
+  const top20 = sorted.slice(0, 20);
+
+  listEl.innerHTML = top20.map((entry, i) => {
+    const rank = i + 1;
+    const rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+    const isMe = entry[0] === username;
+    return `
+      <div class="lb-row ${isMe ? 'is-me' : ''}">
+        <div class="lb-rank ${rankClass}">${rank}</div>
+        <div class="lb-name">${escHtml(entry[0])} ${isMe ? '<span class="lb-you-tag">YOU</span>' : ''}</div>
+        <div class="lb-score">${entry[1]}</div>
+        <div class="lb-poop">💩</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderHistory() {
+  const listEl = document.getElementById('history-list');
+  const tagEl = document.getElementById('history-username-tag');
+
+  if (!username) {
+    listEl.innerHTML = '<div class="empty-state"><span class="empty-emoji">👤</span>Namen eingeben um History zu sehen</div>';
+    tagEl.textContent = '';
+    return;
+  }
+
+  tagEl.textContent = `@${username}`;
+
+  if (myEntries.length === 0) {
+    listEl.innerHTML = '<div class="empty-state"><span class="empty-emoji">📭</span>Noch keine Logs</div>';
+    return;
+  }
+
+  listEl.innerHTML = myEntries.slice(0, 30).map(e => {
+    const emoji = TYPE_EMOJIS[e.type] || '💩';
+    const date = e.timestamp ? new Date(e.timestamp).toLocaleString('de-DE', {
+      day: '2-digit', month: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    }) : 'Unknown';
+    const stars = '💩'.repeat(e.rating || 0);
+    return `
+      <div class="history-item">
+        <div class="history-emoji">${emoji}</div>
+        <div class="history-info">
+          <div class="history-title">${capitalize(e.type || 'normal')} ${e.note ? '· ' + escHtml(e.note.substring(0,40)) : ''}</div>
+          <div class="history-meta">${date}</div>
+          <div class="history-stars">${stars}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStats(allEntries) {
+  if (!username || myEntries.length === 0) {
+    document.getElementById('stat-total').textContent = 0;
+    document.getElementById('stat-today').textContent = 0;
+    document.getElementById('stat-avg').textContent = '–';
+    document.getElementById('stat-fav').textContent = '–';
+    renderWeekChart([]);
+    return;
+  }
+
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const todayCount = myEntries.filter(e => e.timestamp > todayStart.getTime()).length;
+
+  // Avg rating
+  const ratingsArr = myEntries.filter(e => e.rating).map(e => e.rating);
+  const avgRating = ratingsArr.length ? (ratingsArr.reduce((a,b) => a+b, 0) / ratingsArr.length).toFixed(1) : '–';
+
+  // Fav type
+  const typeCounts = {};
+  myEntries.forEach(e => { typeCounts[e.type || 'normal'] = (typeCounts[e.type || 'normal'] || 0) + 1; });
+  const favType = Object.entries(typeCounts).sort((a,b) => b[1]-a[1])[0];
+
+  // Streak
+  const streak = calcStreak(myEntries);
+
+  document.getElementById('stat-total').textContent = myEntries.length;
+  document.getElementById('stat-today').textContent = todayCount;
+  document.getElementById('stat-avg').textContent = avgRating;
+  document.getElementById('stat-fav').textContent = favType ? TYPE_EMOJIS[favType[0]] : '–';
+  document.getElementById('stat-streak').textContent = streak;
+
+  renderWeekChart(myEntries);
+}
+
+function calcStreak(entries) {
+  if (!entries.length) return 0;
+  const days = new Set();
+  entries.forEach(e => {
+    if (e.timestamp) {
+      const d = new Date(e.timestamp);
+      days.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    }
+  });
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if (days.has(key)) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+function renderWeekChart(entries) {
+  const chartEl = document.getElementById('week-chart');
+  const labelsEl = document.getElementById('week-labels');
+  const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const counts = [0,0,0,0,0,0,0];
+
+  const now = new Date();
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  weekStart.setHours(0,0,0,0);
+
+  entries.forEach(e => {
+    if (!e.timestamp) return;
+    const d = new Date(e.timestamp);
+    const dayIdx = Math.floor((d - weekStart) / (1000 * 60 * 60 * 24));
+    if (dayIdx >= 0 && dayIdx < 7) counts[dayIdx]++;
+  });
+
+  const maxCount = Math.max(...counts, 1);
+
+  chartEl.innerHTML = counts.map((c, i) => {
+    const h = Math.max(4, Math.round((c / maxCount) * 70));
+    const today = (now.getDay() + 6) % 7;
+    const isToday = i === today;
+    return `<div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px;">
+      <span style="font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--text3);">${c || ''}</span>
+      <div style="width:100%; height:${h}px; background:${isToday ? 'var(--gold)' : 'var(--bg4)'}; border-radius:4px 4px 0 0; border:1px solid ${isToday ? 'var(--gold3)' : 'var(--border)'}; min-height:4px;"></div>
+    </div>`;
+  }).join('');
+
+  labelsEl.innerHTML = days.map((d, i) => {
+    const today = (now.getDay() + 6) % 7;
+    return `<span style="font-family:'DM Mono',monospace; font-size:0.6rem; color:${i === today ? 'var(--gold)' : 'var(--text3)'}; flex:1; text-align:center;">${d}</span>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────────────────────────
+// LOG ENTRY
+// ──────────────────────────────────────────────────────────────
+async function logEntry() {
+  if (!firebaseReady) {
+    showToast('Firebase noch nicht bereit...', 'error');
+    return;
+  }
+
+  const uname = document.getElementById('username').value.trim();
+  if (!uname) {
+    showToast('⚠️ Erst Namen eingeben!', 'error');
+    document.getElementById('username').focus();
+    return;
+  }
+
+  username = uname;
+  localStorage.setItem('tt_username', username);
+
+  const note = document.getElementById('note').value.trim();
+  const entry = {
+    username: username,
+    rating: currentRating,
+    type: currentType,
+    note: note || null,
+    timestamp: Date.now(),
+    platform: 'pwa'
+  };
+
+  try {
+    const db = window._db;
+    const ref = window._ref;
+    const push = window._push;
+
+    await push(ref(db, 'entries'), entry);
+    showToast('💩 Geloggt! +1 Score!');
+
+    // Reset form
+    document.getElementById('note').value = '';
+    setRating(3);
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Firebase Error – API Key prüfen!', 'error');
+    document.getElementById('key-warning').style.display = 'block';
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// UI HELPERS
+// ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function saveUsername() {
+  const val = document.getElementById('username').value.trim();
+  if (!val) return;
+  username = val;
+  localStorage.setItem('tt_username', username);
+  showToast(`👤 ${username} gespeichert!`);
+  // Refresh my entries
+  if (window._db) {
+    document.getElementById('history-list').innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+  }
+}
+
+function setRating(val) {
+  currentRating = val;
+  document.querySelectorAll('.star').forEach((s, i) => {
+    s.classList.toggle('active', i < val);
+  });
+  document.getElementById('log-btn-info').textContent = `Rating: ${'💩'.repeat(val)} (${val}/5)`;
+}
+
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.type === type);
+  });
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.style.background = type === 'error' ? 'var(--danger)' : 'var(--success)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function capitalize(str) {
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+}
+
+// ──────────────────────────────────────────────────────────────
+// PWA SERVICE WORKER (inline registration)
+// ──────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'turdtracker-v1';
+    const ASSETS = ['./', './index.html'];
+
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+      self.skipWaiting();
+    });
+
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+
+    self.addEventListener('fetch', e => {
+      if (e.request.url.includes('firebasedatabase.app') ||
+          e.request.url.includes('gstatic.com') ||
+          e.request.url.includes('googleapis.com')) return;
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(err => {
+    console.log('SW registration failed (normal for localhost):', err);
+  });
+}
+</script>
+
+</body>
+</html>
