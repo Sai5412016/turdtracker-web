@@ -467,7 +467,7 @@
 // ══════════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ══════════════════════════════════════════════════════════════
-var ANTHROPIC_API_KEY = 'sk-ant-api03-' + 'ixlnDiudMiv7taczmLEgYL_vl0HV0RBtKPYrneFkrbP3qTDdgBPUTE9d9nl-TU2ybqXd6JL_dUwL9T-DJZBoyw-s3oGXgAA';
+var WORKER_URL = 'https://turdtracker-proxy.sai5412016.workers.dev';
 
 const BRISTOL_NAMES = {1:'Einzelne harte Klümpchen',2:'Wurstförmig, klumpig',3:'Wurstförmig, Risse',4:'Glatt und weich (Ideal)',5:'Weiche Klümpchen',6:'Breiige Konsistenz',7:'Wässrig, flüssig'};
 const SYMPTOMS = [{id:'bloating',l:'Blähungen',e:'💨'},{id:'cramps',l:'Krämpfe',e:'😣'},{id:'nausea',l:'Übelkeit',e:'🤢'},{id:'blood',l:'Blut',e:'🔴'},{id:'mucus',l:'Schleim',e:'💧'},{id:'pain',l:'Schmerzen',e:'⚡'},{id:'stress',l:'Stress',e:'😤'}];
@@ -566,16 +566,16 @@ function resetAnalysis(){
 async function analyzePhoto(){
   if(!currentPhotoBase64){toast('Kein Foto ausgewählt','err');return;}
   if(!username){toast('⚠️ Erst Username eingeben!','err');document.getElementById('username').focus();return;}
-  if(ANTHROPIC_API_KEY==='DEIN_ANTHROPIC_API_KEY_HIER'){toast('⚠️ API Key nicht gesetzt!','err');return;}
+  
 
   document.getElementById('preview-section').style.display='none';
   document.getElementById('analyzing-section').style.display='block';
 
   try {
     const mediaType = currentPhotoFile?.type || 'image/jpeg';
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+    const resp = await fetch(WORKER_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:1024,
